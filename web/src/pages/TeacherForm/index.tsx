@@ -3,6 +3,7 @@ import React from 'react';
 import PageHeader from '../components/PageHeader';
 import Input from '../components/Input';
 import warmingIcon from '../../assets/images/icons/warning.svg'
+import Textarea from '../components/Textarea';
 
 import './styles.css';
 
@@ -22,10 +23,11 @@ function TeacherForm() {
           <Input name="whatsapp" label="Whatsapp"/>
         </fieldset>
 
-        <fieldset>
+        <fieldset style={{ marginTop: 50 }}>
           <legend>Sobre a aula</legend>
           <Input name="subject" label="matéria"/>
           <Input name="cost" label="Custo da sua hora por aula"/>
+          <Textarea name="bio" label="Biografia" />
         </fieldset>
 
         <footer>
