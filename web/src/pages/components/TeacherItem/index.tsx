@@ -1,32 +1,52 @@
 import React from 'react';
 
 import whatsappIcon from '../../../assets/images/icons/whatsapp.svg';
+import api from '../../../services/api';
 
 import './styles.css';
 
-const TeacherItem: React.FC = () => {
+export interface Teacher {
+  id: number;
+  avatar: string;
+  bio: string;
+  cost: number;
+  name: string;
+  subject: string;
+  whatsapp: string;
+}
+
+interface TeacherItemProps {
+  teacher: Teacher;
+}
+
+const TeacherItem: React.FC<TeacherItemProps> = ({ teacher }) => {
+
+  function createNewConnection() {
+    api.post('connections', {
+      user_id: teacher.id
+    });
+  }
+
   return (
       <>
         <article className="teacher-item">
           <header>
-            <img src="https://avatars2.githubusercontent.com/u/55449539?s=460&u=adfce082996ab758897c013ac71843a6476a2f19&v=4" alt="Kevson Filipe"/>
+            <img src={teacher.avatar} alt={teacher.avatar}/>
             <div>
-              <strong>Kevson Filipe</strong>
-              <span>React-native</span>
+              <strong>{teacher.name}</strong>
+              <span>{teacher.subject}</span>
             </div>
           </header>
-          <p>Entusiasta das melhores tecnologias de química avançada. <br/><br/>
-            Apaixonado por explodir coisas em laboratório e por mudar a vida das pessoas através de experiências. Mais de 200.000 pessoas já passaram por uma das minhas explosões.
-          </p>
+          <p>{teacher.bio}</p>
           <footer>
             <p>
               Preço/hora
-              <strong>R$ 80,00</strong>
+              <strong>R$ {teacher.cost}</strong>
             </p>
-            <button type="button">
+            <a target="_blank" onClick={createNewConnection} href={`https://wa.me/${teacher.whatsapp}`}>
               <img src={whatsappIcon} alt="Entrar em contato"/>
               Entrar em contato
-            </button>
+            </a>
           </footer>
         </article>
       </>

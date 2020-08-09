@@ -1,13 +1,78 @@
-import React from 'react';
+import React, { useState, FormEvent} from 'react';
+import { useHistory } from 'react-router-dom';
 
 import PageHeader from '../components/PageHeader';
 import Input from '../components/Input';
 import warmingIcon from '../../assets/images/icons/warning.svg'
 import Textarea from '../components/Textarea';
+import Select from '../components/Select';
+import api from '../../services/api';
 
 import './styles.css';
 
 function TeacherForm() {
+  const history = useHistory();
+
+  const [ name, setName ] = useState('');
+  const [ avatar, setAvatar ] = useState('');
+  const [ whatsapp, setWhatsapp ] = useState('');
+  const [ bio, setBio ] = useState('');
+
+  const [ subject, setSubject ] = useState('');
+  const [ cost, setCost ] = useState('');
+  
+  const [ scheduleItems, setScheduleItems ] = useState([
+    { week_day: 0, from: '',to: '' }
+  ]);
+
+  function addNewScheduleItem() {
+    setScheduleItems([
+      ...scheduleItems,  
+      { week_day: 0, from: '',to: '' }
+    ]);
+  }
+
+  function setScheduleItemValue(position: number, field: string, value: string) {
+    const updatedScheduleItem = scheduleItems.map((scheduleItem, index) => {
+      if (index === position) {
+        return { ...scheduleItem, [field]: value };
+      }
+
+      return scheduleItem;
+    });
+
+    setScheduleItems(updatedScheduleItem);
+  }
+
+  function handleCreateClass(event: FormEvent) {
+    event.preventDefault();
+
+    console.log({
+      name,
+      avatar,
+      whatsapp,
+      bio,
+      subject,
+      cost: Number(cost),
+      schedule: scheduleItems,
+    });
+
+    api.post('classes', {
+      name,
+      avatar,
+      whatsapp,
+      bio,
+      subject,
+      cost: Number(cost),
+      schedule: scheduleItems,
+    }).then(() => {
+      alert('Cadastro Realizado!');
+      history.push('/');
+    }).catch(() => {
+      alert('Erro no cadastro!');
+    });
+  }
+
   return (
     <div id="page-teacher-form" className="container">
       <PageHeader
@@ -16,30 +81,129 @@ function TeacherForm() {
       />
 
       <main>
-        <fieldset>
-          <legend>Seus dados</legend>
-          <Input name="name" label="Nome completo"/>
-          <Input name="avatar" label="Avatar"/>
-          <Input name="whatsapp" label="Whatsapp"/>
-        </fieldset>
+        <form onSubmit= {handleCreateClass}>
+          <fieldset>
+            <legend>Seus dados</legend>
+            <Input
+              name="name"
+              label="Nome completo"
+              value={name}
+              onChange={(event) => { setName(event.target.value) }}
+            />
+            <Input
+              name="avatar"
+              label="Avatar"
+              value={avatar}
+              onChange={(event) => { setAvatar(event.target.value) }}
+            />
+            <Input
+              name="whatsapp"
+              label="Whatsapp"
+              value={whatsapp}
+              onChange={(event) => { setWhatsapp(event.target.value) }}
+            />
+            <Textarea
+              name="bio"
+              label="Biografia"
+              value={bio}
+              onChange={(event) => { setBio(event.target.value) }}
+            />
+          </fieldset>
 
-        <fieldset style={{ marginTop: 50 }}>
-          <legend>Sobre a aula</legend>
-          <Input name="subject" label="matéria"/>
-          <Input name="cost" label="Custo da sua hora por aula"/>
-          <Textarea name="bio" label="Biografia" />
-        </fieldset>
+          <fieldset style={{ marginTop: 50 }}>
+            <legend>Sobre a aula</legend>
+            <Select 
+              name="subject"
+              label="matéria"
+              value={subject}
+              onChange={(event) => { setSubject(event.target.value) }}
+              options={[
+                { value: 'Artes', label: 'Artes' },
+                { value: 'Biologia', label: 'Biologia' },
+                { value: 'Ciência', label: 'Ciência' },
+                { value: 'Educação Física', label: 'Educação Física' },
+                { value: 'Empreendedorismo', label: 'Empreendedorismo' },
+                { value: 'Filosofia', label: 'Filosofia' },
+                { value: 'Física', label: 'Física' },
+                { value: 'Geografia', label: 'Geografia' },
+                { value: 'Gestão de Tecnologia da Informação', label: 'Gestão de Tecnologia da Informação' },
+                { value: 'História', label: 'História' },
+                { value: 'Língua Espanhola', label: 'Língua Espanhola' },
+                { value: 'Língua Portuguesa', label: 'Língua Portuguesa' },
+                { value: 'Linguagem de Programação Or. Objetos', label: 'Linguagem de Programação Or. Objetos' },
+                { value: 'Matemática', label: 'Matemática' },
+                { value: 'Projeto Integrador', label: 'Projeto Integrador' },
+                { value: 'Qualidade de Software', label: 'Qualidade de Software' },
+                { value: 'Química', label: 'Química' },
+                { value: 'Segurança da Informação', label: 'Segurança da Informação' },
+                { value: 'Sociologia', label: 'Sociologia' },
+                { value: 'WebDesign', label: 'WebDesign' },
+              ]}
+            />
+            <Input
+              name="cost"
+              label="Custo da sua hora por aula"
+              value={cost}
+              onChange={(event) => { setCost(event.target.value) }}
+            />
+          </fieldset>
 
-        <footer>
-          <p>
-            <img src={warmingIcon} alt="Aviso importante"/>
-            Importante! <br />
-            Prenncha todos os dados
-          </p>
-          <button type="button">
-            Salvar cadastro
-          </button>
-        </footer>
+          <fieldset>
+            <legend>
+              Horários disponíveis
+              <button type="button" onClick={addNewScheduleItem}>
+                + Novo horário
+              </button>
+            </legend>
+            
+            {scheduleItems.map((scheduleItem, index) => {
+              return (
+                <div key={scheduleItem.week_day} className="schedule-item">
+                  <Select
+                    name="week_day"
+                    label="Dia da Semana"
+                    value={scheduleItem.week_day}
+                    onChange={event => setScheduleItemValue(index, 'week_day', event.target.value)}
+                    options={[
+                      { value: '0', label: 'Domingo' },
+                      { value: '1', label: 'Segunda-feira' },
+                      { value: '2', label: 'Terça-feira' },
+                      { value: '3', label: 'Quarta-feira' },
+                      { value: '4', label: 'Quinta-feira' },
+                      { value: '5', label: 'Sexta' },
+                      { value: '6', label: 'Sábado' },
+                    ]}
+                  />
+                  <Input
+                    name="from"
+                    label="das"
+                    type="time"
+                    value={scheduleItem.from}
+                    onChange={event => setScheduleItemValue(index, 'from', event.target.value)}
+                  />
+                  <Input
+                    name="to"
+                    label="até"
+                    type="time"
+                    value={scheduleItem.to}
+                    onChange={event => setScheduleItemValue(index, 'to', event.target.value)}
+                  />
+                </div>
+              )
+            })}
+          </fieldset>
+
+          <footer>
+            <p>
+              <img src={warmingIcon} alt="Aviso importante"/>
+              Importante! <br />
+              Prenncha todos os dados
+            </p>
+            <button type="submit">
+              Salvar cadastro
+            </button>
+          </footer>
+        </form>
       </main>
     </div>
   );
