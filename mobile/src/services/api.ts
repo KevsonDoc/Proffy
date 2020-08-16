@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://192.168.15.139:3333'
+    baseURL: 'https://proffyapi3.herokuapp.com'
 });
 
 export default api;
